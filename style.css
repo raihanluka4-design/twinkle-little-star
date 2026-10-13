@@ -1,0 +1,804 @@
+:root {
+  --bg-primary: #05080c;
+  --bg-panel: #0a111a;
+  --bg-panel-border: #162436;
+  --green-ecg: #00ff66;
+  --green-ecg-glow: rgba(0, 255, 102, 0.45);
+  --cyan-pleth: #00e5ff;
+  --cyan-pleth-glow: rgba(0, 229, 255, 0.4);
+  --yellow-art: #ffcc00;
+  --yellow-art-glow: rgba(255, 204, 0, 0.4);
+  --red-critical: #ff1a40;
+  --red-glow: rgba(255, 26, 64, 0.55);
+  --orange-charge: #ff9100;
+  --text-main: #d3e4f5;
+  --text-dim: #5c728a;
+  --grid-line: rgba(0, 255, 102, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Rajdhani', -apple-system, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Patient Monitor Container */
+.patient-monitor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 12px 16px;
+  gap: 12px;
+  background: radial-gradient(circle at 50% 20%, #0d1928 0%, #04070c 100%);
+  position: relative;
+}
+
+/* Header */
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--bg-panel-border);
+  border-radius: 8px;
+  padding: 8px 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.hospital-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  color: #6a8ba8;
+}
+
+.patient-id {
+  font-size: 1.05rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 6px 18px;
+  border-radius: 6px;
+  letter-spacing: 1.5px;
+  animation: pulseBadge 1s infinite alternate;
+}
+
+.status-badge.critical {
+  background: rgba(255, 26, 64, 0.2);
+  border: 1px solid var(--red-critical);
+  color: #ff4d6d;
+  box-shadow: 0 0 15px var(--red-glow);
+}
+
+.status-badge.stable {
+  background: rgba(0, 255, 102, 0.15);
+  border: 1px solid var(--green-ecg);
+  color: #4efca0;
+  box-shadow: 0 0 15px var(--green-ecg-glow);
+  animation: none;
+}
+
+.status-badge.dead {
+  background: rgba(100, 100, 100, 0.3);
+  border: 1px solid #777;
+  color: #aaa;
+  animation: none;
+}
+
+@keyframes pulseBadge {
+  0% { transform: scale(1); opacity: 0.85; }
+  100% { transform: scale(1.03); opacity: 1; box-shadow: 0 0 25px var(--red-glow); }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.clock {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.25rem;
+  color: #8bb2d4;
+  letter-spacing: 1px;
+}
+
+.audio-btn {
+  background: #142232;
+  border: 1px solid #233b54;
+  color: #79a6cc;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.audio-btn:hover {
+  background: #1c3249;
+  color: #aadeff;
+}
+
+/* Main Body Layout */
+.monitor-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* Waveforms Left Panel */
+.waveforms-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.wave-box {
+  flex: 1;
+  background: var(--bg-panel);
+  border: 1px solid var(--bg-panel-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.wave-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ecg-box .wave-name { color: var(--green-ecg); }
+.spo2-box .wave-name { color: var(--cyan-pleth); }
+.art-box .wave-name { color: var(--yellow-art); }
+
+.wave-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: #8da4be;
+}
+
+.canvas-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.65;
+}
+
+/* Vitals & Timer Panel */
+.vitals-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* Death Timer Box */
+.death-timer-box {
+  background: linear-gradient(145deg, rgba(35, 10, 16, 0.95), rgba(16, 8, 12, 0.95));
+  border: 2px solid var(--red-critical);
+  border-radius: 8px;
+  padding: 14px 18px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255, 26, 64, 0.25);
+  transition: all 0.3s;
+}
+
+.death-timer-box.safe {
+  background: linear-gradient(145deg, rgba(8, 28, 16, 0.9), rgba(6, 18, 12, 0.9));
+  border-color: var(--green-ecg);
+  box-shadow: 0 0 25px rgba(0, 255, 102, 0.25);
+}
+
+.death-timer-box.expired {
+  background: #141414;
+  border-color: #555;
+  box-shadow: none;
+}
+
+.timer-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #ff6b85;
+}
+
+.death-timer-box.safe .timer-label {
+  color: #63ff9e;
+}
+
+.death-timer-box.expired .timer-label {
+  color: #888;
+}
+
+.timer-display {
+  font-family: 'Orbitron', monospace;
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #ff1a40;
+  text-shadow: 0 0 20px var(--red-glow);
+  line-height: 1.1;
+  margin: 6px 0;
+}
+
+.death-timer-box.safe .timer-display {
+  color: var(--green-ecg);
+  text-shadow: 0 0 20px var(--green-ecg-glow);
+}
+
+.death-timer-box.expired .timer-display {
+  color: #666;
+  text-shadow: none;
+}
+
+.timer-display .unit {
+  font-size: 1.6rem;
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+.progress-bar-container {
+  height: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff1a40, #ff8000);
+  box-shadow: 0 0 10px #ff1a40;
+  transition: width 0.1s linear;
+}
+
+.death-timer-box.safe .progress-bar-fill {
+  background: var(--green-ecg);
+  box-shadow: 0 0 10px var(--green-ecg);
+  width: 100% !important;
+}
+
+.timer-subtext {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  color: #ff99aa;
+  animation: blinkFast 0.8s infinite alternate;
+}
+
+.death-timer-box.safe .timer-subtext {
+  color: #7affb5;
+  animation: none;
+}
+
+@keyframes blinkFast {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* Vital Signs Grid */
+.vital-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.vital-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--bg-panel-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-value {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.3rem;
+  font-weight: 900;
+  margin: 4px 0;
+  line-height: 1;
+}
+
+.card-range {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.hr-card .card-title { color: var(--green-ecg); }
+.hr-card .card-value { color: var(--green-ecg); text-shadow: 0 0 12px var(--green-ecg-glow); }
+
+.spo2-card .card-title { color: var(--cyan-pleth); }
+.spo2-card .card-value { color: var(--cyan-pleth); text-shadow: 0 0 12px var(--cyan-pleth-glow); }
+
+.bp-card .card-title { color: var(--yellow-art); }
+.bp-card .card-value { color: var(--yellow-art); font-size: 1.85rem; text-shadow: 0 0 12px var(--yellow-art-glow); }
+
+.resp-card .card-title { color: #d178ff; }
+.resp-card .card-value { color: #d178ff; text-shadow: 0 0 12px rgba(209, 120, 255, 0.4); }
+
+.pulse-icon {
+  display: inline-block;
+  animation: heartThump 1.2s infinite;
+}
+
+@keyframes heartThump {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.35); }
+  30% { transform: scale(1.05); }
+  45% { transform: scale(1.25); }
+}
+
+/* Console Message Log */
+.monitor-console {
+  flex: 1;
+  background: #060a0f;
+  border: 1px solid #142334;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.console-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: #5c7b99;
+  letter-spacing: 1.5px;
+}
+
+.console-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #92b8de;
+  overflow-y: auto;
+}
+
+/* Defibrillator Station (Bottom Dock) */
+.defib-station {
+  background: #0f1824;
+  border: 2px solid #233b54;
+  border-radius: 10px;
+  padding: 10px 18px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.defib-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #79a1c8;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffaa00;
+  box-shadow: 0 0 8px #ffaa00;
+  animation: pulseDot 1s infinite alternate;
+}
+
+@keyframes pulseDot {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.defib-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.defib-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.defib-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8da4be;
+}
+
+/* Energy Selector Buttons */
+.energy-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.energy-btn {
+  background: #142232;
+  border: 1px solid #2c4767;
+  color: #a0c2e2;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.energy-btn:hover {
+  background: #1e3550;
+  border-color: #436b9c;
+}
+
+.energy-btn.active {
+  background: #0d3b66;
+  border-color: #00d2ff;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+}
+
+/* Action Buttons */
+.btn {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 1.2px;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.btn-charge {
+  background: linear-gradient(145deg, #e67e00, #b35900);
+  border: 2px solid #ffaa33;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 153, 0, 0.4);
+}
+
+.btn-charge:hover:not(:disabled) {
+  background: linear-gradient(145deg, #ff9100, #cc6600);
+  box-shadow: 0 0 25px rgba(255, 170, 0, 0.7);
+  transform: translateY(-2px);
+}
+
+.charge-meter-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.charge-gauge {
+  flex: 1;
+  height: 8px;
+  background: #1a2838;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #2f455d;
+}
+
+.charge-gauge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--charge-pct, 0%);
+  background: linear-gradient(90deg, #ff9900, #ffea00);
+  box-shadow: 0 0 10px #ffcc00;
+  transition: width 0.1s ease;
+}
+
+.charge-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #ffaa33;
+  width: 38px;
+  text-align: right;
+}
+
+/* Deliver Shock Button */
+.btn-shock {
+  background: linear-gradient(145deg, #d90429, #9d0208);
+  border: 2px solid #ff2a4d;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(235, 4, 41, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shock:hover:not(:disabled) {
+  background: linear-gradient(145deg, #ef233c, #bd001b);
+  box-shadow: 0 0 35px rgba(255, 42, 77, 0.9);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-shock.ready {
+  animation: shockReadyGlow 0.5s infinite alternate;
+}
+
+@keyframes shockReadyGlow {
+  0% { box-shadow: 0 0 15px #ff2a4d; border-color: #ff5577; }
+  100% { box-shadow: 0 0 35px #ff0033, 0 0 60px rgba(255,0,0,0.6); border-color: #ffffff; }
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: grayscale(0.8);
+}
+
+.shock-warning {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: #ff6b85;
+}
+
+/* Reset Button */
+.btn-reset {
+  background: #1b2837;
+  border: 1px solid #364e6b;
+  color: #92b5d8;
+  font-size: 0.82rem;
+  padding: 10px 16px;
+}
+
+.btn-reset:hover {
+  background: #253a52;
+  color: #fff;
+}
+
+/* Shock Screen Flash */
+.shock-flash-screen {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.05s ease-out;
+}
+
+.shock-flash-screen.flash {
+  opacity: 0.95;
+}
+
+/* Death Modal / Marker */
+.death-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease;
+}
+
+.death-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.death-content {
+  background: #0e0e11;
+  border: 3px solid #70101c;
+  border-radius: 12px;
+  padding: 36px 45px;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(255, 0, 0, 0.4), inset 0 0 30px rgba(0,0,0,0.8);
+  animation: modalEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalEnter {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.death-cross {
+  font-size: 4.5rem;
+  color: #e61939;
+  text-shadow: 0 0 30px rgba(230, 25, 57, 0.7);
+  line-height: 1;
+  margin-bottom: 10px;
+  animation: wobbleSkull 3s infinite ease-in-out;
+}
+
+@keyframes wobbleSkull {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+.death-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+  color: #ff334b;
+  margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(255, 51, 75, 0.6);
+}
+
+.death-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem;
+  color: #8da4be;
+  margin-bottom: 22px;
+}
+
+.death-marker-box {
+  background: #050608;
+  border: 1px solid #2d181d;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.marker-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  border-bottom: 1px dashed #20242a;
+  padding-bottom: 6px;
+}
+
+.marker-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.marker-row span {
+  color: #6d8299;
+}
+
+.marker-row strong {
+  color: #d1dde8;
+}
+
+.marker-row strong.red-text {
+  color: #ff2a4d;
+}
+
+.btn-try-again {
+  background: linear-gradient(145deg, #1b385e, #10243d);
+  border: 2px solid #2a63a5;
+  color: #d3e7ff;
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 1.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s;
+}
+
+.btn-try-again:hover {
+  background: linear-gradient(145deg, #244b7d, #142e4e);
+  border-color: #00d2ff;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Patient chest shock bounce animation for realistic feel */
+.body-convulsion {
+  animation: convulse 0.35s ease-out;
+}
+
+@keyframes convulse {
+  0% { transform: translateY(0); filter: brightness(1); }
+  20% { transform: translateY(-12px) scale(1.02); filter: brightness(2) contrast(1.5); }
+  50% { transform: translateY(6px); }
+  75% { transform: translateY(-2px); }
+  100% { transform: translateY(0); filter: brightness(1); }
+}
+
+@media (max-width: 900px) {
+  body {
+    height: auto;
+    overflow-y: auto;
+  }
+  .patient-monitor-container {
+    height: auto;
+    min-height: 100vh;
+  }
+  .monitor-body {
+    grid-template-columns: 1fr;
+  }
+  .defib-controls {
+    flex-wrap: wrap;
+  }
+}

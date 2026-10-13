@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICU Life Support System & Defibrillator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="patient-monitor-container">
+    <!-- Top Bar: Header & Patient Info -->
+    <header class="monitor-header">
+      <div class="header-left">
+        <span class="hospital-tag">BIO-CARE CRITICAL MONITOR // ICU-BAY 04</span>
+        <div class="patient-id">PATIENT: <strong>JOHN DOE #8832</strong> | ADULT MALE 42Y</div>
+      </div>
+      <div class="header-center">
+        <div id="systemStatusBadge" class="status-badge critical">CRITICAL ALERT: CODE BLUE</div>
+      </div>
+      <div class="header-right">
+        <div class="clock" id="systemClock">12:00:00</div>
+        <button id="audioToggleBtn" class="audio-btn">🔊 AUDIO: ON</button>
+      </div>
+    </header>
+
+    <!-- Main Grid: Monitor Waveforms & Vitals -->
+    <main class="monitor-body">
+      <!-- Left: Real-time Waveforms -->
+      <section class="waveforms-panel">
+        <!-- ECG Lead II -->
+        <div class="wave-box ecg-box">
+          <div class="wave-header">
+            <span class="wave-name">ECG LEAD II (mV)</span>
+            <span class="wave-tag" id="rhythmName">VENTRICULAR FIBRILLATION</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="ecgCanvas"></canvas>
+            <div class="grid-overlay"></div>
+          </div>
+        </div>
+
+        <!-- SPO2 Pleth -->
+        <div class="wave-box spo2-box">
+          <div class="wave-header">
+            <span class="wave-name">PLETH (SpO2)</span>
+            <span class="wave-tag">PERFUSION: 0.1%</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="plethCanvas"></canvas>
+            <div class="grid-overlay"></div>
+          </div>
+        </div>
+
+        <!-- Arterial Blood Pressure (ART) -->
+        <div class="wave-box art-box">
+          <div class="wave-header">
+            <span class="wave-name">ART / ABP (mmHg)</span>
+            <span class="wave-tag">NON-PERFUSING</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="artCanvas"></canvas>
+            <div class="grid-overlay"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Numeric Vitals & Timer -->
+      <section class="vitals-panel">
+        <!-- Cardiac Arrest Death Countdown -->
+        <div class="death-timer-box" id="timerBox">
+          <div class="timer-label">CARDIAC ARREST // IRREVERSIBLE BRAIN DEATH IN</div>
+          <div class="timer-display" id="deathTimer">10.0<span class="unit">s</span></div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="timerProgress"></div>
+          </div>
+          <div class="timer-subtext" id="timerSubtext">IMMEDIATE DEFIBRILLATION REQUIRED</div>
+        </div>
+
+        <!-- Vital Sign Meters -->
+        <div class="vital-cards-grid">
+          <!-- Heart Rate -->
+          <div class="vital-card hr-card">
+            <div class="card-title">HR (bpm) <span class="pulse-icon">❤️</span></div>
+            <div class="card-value" id="valHR">--</div>
+            <div class="card-range">Target: 60 - 100</div>
+          </div>
+
+          <!-- SpO2 Oxygen -->
+          <div class="vital-card spo2-card">
+            <div class="card-title">SpO2 (%)</div>
+            <div class="card-value" id="valSPO2">--</div>
+            <div class="card-range">Target: 95 - 100</div>
+          </div>
+
+          <!-- Blood Pressure -->
+          <div class="vital-card bp-card">
+            <div class="card-title">NIBP / ART (mmHg)</div>
+            <div class="card-value" id="valBP">0/0</div>
+            <div class="card-range">Target: 120 / 80</div>
+          </div>
+
+          <!-- Respiration -->
+          <div class="vital-card resp-card">
+            <div class="card-title">RESP (/min)</div>
+            <div class="card-value" id="valRESP">0</div>
+            <div class="card-range">Target: 12 - 20</div>
+          </div>
+        </div>
+
+        <!-- Patient Status Message Log -->
+        <div class="monitor-console">
+          <div class="console-title">DIAGNOSTIC EVENT LOG:</div>
+          <div class="console-text" id="consoleText">> WARNING: Loss of sustained pulse detected. Ventricular arrest underway. Charge defibrillator paddles now!</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Defibrillator Station Control Panel -->
+    <footer class="defib-station">
+      <div class="defib-badge">
+        <span class="glow-dot"></span>
+        DEFIBRILLATOR UNIT [LIFEPAK 20E PRO]
+      </div>
+
+      <div class="defib-controls">
+        <!-- Energy Selector -->
+        <div class="defib-group energy-select-group">
+          <label>ENERGY SELECT</label>
+          <div class="energy-buttons">
+            <button class="energy-btn active" data-energy="200">200 J</button>
+            <button class="energy-btn" data-energy="300">300 J</button>
+            <button class="energy-btn" data-energy="360">360 J</button>
+          </div>
+        </div>
+
+        <!-- Charge Button & Gauge -->
+        <div class="defib-group charge-group">
+          <button id="chargeBtn" class="btn btn-charge">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-txt">1. CHARGE DEFIB</span>
+          </button>
+          <div class="charge-meter-wrap">
+            <div class="charge-gauge" id="chargeGauge"></div>
+            <span class="charge-val" id="chargeLevelTxt">0%</span>
+          </div>
+        </div>
+
+        <!-- Paddle Shock Discharge Button -->
+        <div class="defib-group shock-group">
+          <button id="shockBtn" class="btn btn-shock" disabled>
+            <span class="btn-flare"></span>
+            <span class="btn-icon">⚠️</span>
+            <span class="btn-txt">2. DELIVER SHOCK</span>
+          </button>
+          <span class="shock-warning" id="shockWarning">PADDLES DISCHARGED / NOT READY</span>
+        </div>
+
+        <!-- Reset Scenario Button -->
+        <div class="defib-group restart-group">
+          <button id="resetBtn" class="btn btn-reset">
+            🔄 RESET SIMULATION
+          </button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Fullscreen Death Marker Overlay -->
+  <div id="deathModal" class="death-modal hidden">
+    <div class="death-content">
+      <div class="death-cross">☠</div>
+      <h1 class="death-title">PATIENT DECEASED</h1>
+      <p class="death-subtitle">TIME OF CLINICAL DEATH: <span id="deathTimestamp">--:--:--</span></p>
+      <div class="death-marker-box">
+        <div class="marker-row"><span>RHYTHM:</span> <strong>ASYSTOLE (FLATLINE)</strong></div>
+        <div class="marker-row"><span>CAUSE:</span> <strong>CARDIAC ARREST REFRACTORY TO TIMELY INTERVENTION</strong></div>
+        <div class="marker-row"><span>RESUSCITATION ATTEMPTS:</span> <strong id="attemptCountDisplay">0</strong></div>
+        <div class="marker-row"><span>STATUS:</span> <strong class="red-text">DECLARED DEAD // POST-MORTEM PROTOCOL</strong></div>
+      </div>
+      <button id="tryAgainBtn" class="btn-try-again">RETRY RESUSCITATION SIMULATION</button>
+    </div>
+  </div>
+
+  <!-- Screen Flash for Defibrillation Shock -->
+  <div id="shockFlash" class="shock-flash-screen"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
